@@ -1,0 +1,121 @@
+<?php
+/**
+ * HelpAssistant - Tours Management View
+ *
+ * This template provides a placeholder for future UI to manage and configure
+ * contextual help tours in the Omeka S admin interface.
+ */
+
+$this->headTitle($this->translate('Help Assistant - Tours'));
+?>
+
+<div id="page-actions">
+    <?php echo $this->hyperlink(
+        $this->translate('Back to Dashboard'),
+        $this->url('admin'),
+        ['class' => 'button']
+    ); ?>
+</div>
+
+<h1><?php echo $this->translate('Help Assistant Tours'); ?></h1>
+
+<div class="help-assistant-tours-container">
+    <section class="tours-overview">
+        <h2><?php echo $this->translate('Available Tours'); ?></h2>
+        <p><?php echo $this->translate('Contextual help tours are available throughout the admin interface to guide you through common tasks.'); ?></p>
+
+        <div class="tour-list">
+            <div class="tour-item">
+                <h3><?php echo $this->translate('Items Tour'); ?></h3>
+                <p><?php echo $this->translate('Learn how to add, edit, and manage items in your collection.'); ?></p>
+                <p><strong><?php echo $this->translate('Location:'); ?></strong> <?php echo $this->translate('Items browse page'); ?></p>
+                <p><em><?php echo $this->translate('Look for the "Start Tour" button next to "Add new item"'); ?></em></p>
+            </div>
+
+            <!-- Placeholder for future tours -->
+            <div class="tour-item" style="opacity: 0.5;">
+                <h3><?php echo $this->translate('Media Tour'); ?></h3>
+                <p><?php echo $this->translate('Coming soon: Learn how to manage media files and attachments.'); ?></p>
+            </div>
+
+            <div class="tour-item" style="opacity: 0.5;">
+                <h3><?php echo $this->translate('Collections Tour'); ?></h3>
+                <p><?php echo $this->translate('Coming soon: Learn how to organize items into collections.'); ?></p>
+            </div>
+
+            <div class="tour-item" style="opacity: 0.5;">
+                <h3><?php echo $this->translate('Site Pages Tour'); ?></h3>
+                <p><?php echo $this->translate('Coming soon: Learn how to create and manage site pages.'); ?></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tours-settings">
+        <h2><?php echo $this->translate('Tour Settings'); ?></h2>
+        <p><?php echo $this->translate('Future features:'); ?></p>
+        <ul>
+            <li><?php echo $this->translate('Enable/disable specific tours'); ?></li>
+            <li><?php echo $this->translate('Customize tour content and steps'); ?></li>
+            <li><?php echo $this->translate('Set auto-start preferences'); ?></li>
+            <li><?php echo $this->translate('Track tour completion'); ?></li>
+        </ul>
+    </section>
+
+    <section class="tours-info">
+        <h2><?php echo $this->translate('How to Use Tours'); ?></h2>
+        <ol>
+            <li><?php echo $this->translate('Navigate to the relevant admin page (e.g., Items browse)'); ?></li>
+            <li><?php echo $this->translate('Click the "Start Tour" button when available'); ?></li>
+            <li><?php echo $this->translate('Follow the highlighted steps and instructions'); ?></li>
+            <li><?php echo $this->translate('Use "Next" and "Back" buttons to navigate through tour steps'); ?></li>
+            <li><?php echo $this->translate('Click "Done" or press ESC to exit the tour at any time'); ?></li>
+        </ol>
+
+        <p><?php echo $this->translate('You can also trigger tours by adding a URL parameter:'); ?></p>
+        <code>?help-tour=items</code>
+    </section>
+</div>
+
+<style>
+.help-assistant-tours-container {
+    max-width: 900px;
+}
+
+.tours-overview,
+.tours-settings,
+.tours-info {
+    margin-bottom: 2em;
+    padding: 1em;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.tour-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1em;
+    margin-top: 1em;
+}
+
+.tour-item {
+    padding: 1em;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.tour-item h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.tours-info code {
+    display: inline-block;
+    padding: 0.2em 0.5em;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-family: monospace;
+}
+</style>

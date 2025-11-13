@@ -1,0 +1,20 @@
+/**
+ * Intro.js v7.2.0 CSS - Placeholder
+ *
+ * This is a placeholder file for the Intro.js CSS library.
+ * Download the actual library from: https://introjs.com/
+ *
+ * Installation instructions:
+ * 1. Visit https://github.com/usablica/intro.js/releases
+ * 2. Download the latest release
+ * 3. Extract introjs.min.css from the package
+ * 4. Replace this file with the actual introjs.min.css
+ *
+ * License: MIT
+ * Website: https://introjs.com/
+ */
+
+body::before {
+    content: "Intro.js CSS placeholder loaded. Please replace with the actual Intro.js CSS library.";
+    display: none;
+}

@@ -1,128 +1,137 @@
 <?php
 declare(strict_types=1);
 
-namespace ModuleTemplate;
+namespace HelpAssistant;
 
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
-use Laminas\Mvc\Controller\AbstractController;
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Module\AbstractModule;
-use Omeka\Mvc\Controller\Plugin\Messenger;
-use Omeka\Stdlib\Message;
-use ModuleTemplate\Form\ConfigForm;
 
 /**
- * Main class for the module.
+ * HelpAssistant Module
+ *
+ * Provides contextual help tours for the Omeka S admin interface using Intro.js
  */
 class Module extends AbstractModule
 {
     /**
-     * Retrieve the configuration array.
+     * Get the module configuration array
      *
      * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return include __DIR__ . '/config/module.config.php';
     }
 
     /**
-     * Execute logic when the module is installed.
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     */
-    public function install(ServiceLocatorInterface $serviceLocator)
-    {
-        $messenger = new Messenger();
-        $message = new Message("ModuleTemplate module installed.");
-        $messenger->addSuccess($message);
-    }
-    /**
-     * Execute logic when the module is uninstalled.
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     */
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
-    {
-        $messenger = new Messenger();
-        $message = new Message("ModuleTemplate module uninstalled.");
-        $messenger->addWarning($message);
-    }
-    
-    /**
-     * Register the file validator service and renderers.
+     * Attach listeners to events
      *
      * @param SharedEventManagerInterface $sharedEventManager
+     * @return void
      */
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
-        // Replace the default file validator with our custom one
-    }
-    
-    /**
-     * Get the configuration form for this module.
-     *
-     * @param PhpRenderer $renderer
-     * @return string
-     */
-    public function getConfigForm(PhpRenderer $renderer)
-    {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $settings = $services->get('Omeka\Settings');
-        
-        $form = new ConfigForm();
-        $form->init();
-
-        // Seed form fields with saved settings or defaults
-        $form->setData([
-            'activate_ModuleTemplate_cb' => $settings->get('activate_ModuleTemplate', 1),
-            'moduletemplate_demo_toggle' => $settings->get('moduletemplate_demo_toggle', false) ? '1' : '0',
-            'moduletemplate_demo_text' => $settings->get('moduletemplate_demo_text', 'Default text'),
-            'moduletemplate_demo_textarea' => $settings->get('moduletemplate_demo_textarea', "Line 1\nLine 2"),
-            'moduletemplate_demo_number' => $settings->get('moduletemplate_demo_number', 500),
-            'moduletemplate_demo_select' => $settings->get('moduletemplate_demo_select', 'b'),
-            'moduletemplate_demo_color' => $settings->get('moduletemplate_demo_color', '#3366ff'),
-            'moduletemplate_demo_email' => $settings->get('moduletemplate_demo_email', 'demo@example.com'),
-            'moduletemplate_demo_url' => $settings->get('moduletemplate_demo_url', 'https://example.com'),
-        ]);
-        
-        return $renderer->formCollection($form, false);
-    }
-    
-    /**
-     * Handle the configuration form submission.
-     *
-     * @param AbstractController $controller
-     */
-    public function handleConfigForm(AbstractController $controller)
-    {
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        
-        $config = $controller->params()->fromPost();
-
-        $value = isset($config['activate_ModuleTemplate_cb']) ? $config['activate_ModuleTemplate_cb'] : 0;
-        $settings->set('activate_ModuleTemplate', $value);
-
-        // Persist demo settings (cast/basic normalization)
-        $settings->set(
-            'moduletemplate_demo_toggle',
-            isset($config['moduletemplate_demo_toggle'])
-                && $config['moduletemplate_demo_toggle'] === '1'
+        // Attach listener to load assets in admin interface
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Item',
+            'view.layout',
+            [$this, 'loadAdminAssets']
         );
-        $settings->set('moduletemplate_demo_text', (string)($config['moduletemplate_demo_text'] ?? ''));
-        $settings->set('moduletemplate_demo_textarea', (string)($config['moduletemplate_demo_textarea'] ?? ''));
-        if (isset($config['moduletemplate_demo_number']) && is_numeric($config['moduletemplate_demo_number'])) {
-            $settings->set('moduletemplate_demo_number', (int)$config['moduletemplate_demo_number']);
-        }
-        $settings->set('moduletemplate_demo_select', (string)($config['moduletemplate_demo_select'] ?? ''));
-        $settings->set('moduletemplate_demo_color', (string)($config['moduletemplate_demo_color'] ?? ''));
-        $settings->set('moduletemplate_demo_email', (string)($config['moduletemplate_demo_email'] ?? ''));
-        $settings->set('moduletemplate_demo_url', (string)($config['moduletemplate_demo_url'] ?? ''));
+
+        // Attach listener to inject "Start Tour" button in items browse page
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Item',
+            'view.browse.after',
+            [$this, 'injectTourButton']
+        );
     }
-    
-    // /**
+
+    /**
+     * Load Intro.js assets and custom initialization script in admin interface
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function loadAdminAssets(Event $event): void
+    {
+        $view = $event->getTarget();
+
+        if (!$view instanceof PhpRenderer) {
+            return;
+        }
+
+        // Load Intro.js CSS (placeholder - library not embedded)
+        $view->headLink()->appendStylesheet($view->assetUrl('css/introjs.min.css', 'HelpAssistant'));
+
+        // Load Intro.js JavaScript (placeholder - library not embedded)
+        $view->headScript()->appendFile($view->assetUrl('js/intro.min.js', 'HelpAssistant'));
+
+        // Load custom initialization script
+        $view->headScript()->appendFile($view->assetUrl('js/helpassistant-init.js', 'HelpAssistant'));
+    }
+
+    /**
+     * Inject "Start Tour" button to the left of "Add new item" button
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function injectTourButton(Event $event): void
+    {
+        $view = $event->getTarget();
+
+        if (!$view instanceof PhpRenderer) {
+            return;
+        }
+
+        // Get the current action to ensure we're on the browse page
+        $routeMatch = $view->params()->fromRoute();
+
+        if (!isset($routeMatch['action']) || $routeMatch['action'] !== 'browse') {
+            return;
+        }
+
+        // Inject JavaScript to add the "Start Tour" button
+        $script = <<<'JS'
+<script>
+(function() {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find the "Add new item" button
+        const addNewButton = document.querySelector('a.button[href*="/admin/item/add"]');
+
+        if (!addNewButton) {
+            return;
+        }
+
+        // Create the "Start Tour" button
+        const tourButton = document.createElement('button');
+        tourButton.type = 'button';
+        tourButton.className = 'button';
+        tourButton.id = 'help-assistant-tour-btn';
+        tourButton.textContent = 'Start Tour';
+        tourButton.style.marginRight = '10px';
+
+        // Insert the button before the "Add new item" button
+        addNewButton.parentNode.insertBefore(tourButton, addNewButton);
+
+        // Attach click event to start the tour
+        tourButton.addEventListener('click', function() {
+            if (typeof window.HelpAssistant !== 'undefined' &&
+                typeof window.HelpAssistant.startItemsTour === 'function') {
+                window.HelpAssistant.startItemsTour();
+            } else {
+                console.error('HelpAssistant tour not available');
+            }
+        });
+    });
+})();
+</script>
+JS;
+
+        echo $script;
+    }
 }

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(New-Item -ItemType File -Path \"c:\\Users\\franc\\OneDrive\\Documentos\\Desarrollos\\Trabajo\\ATE\\omeka-s-HelpAssistant\\config\\module.ini\" -Force)",
+      "Bash(touch:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
