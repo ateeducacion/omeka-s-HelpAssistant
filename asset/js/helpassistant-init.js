@@ -14,11 +14,9 @@
     window.HelpAssistant = window.HelpAssistant || {};
 
     /**
-     * Tour: How to add a new item
-     *
-     * This tour guides users through the process of creating a new item in Omeka S
+     * Load a tour configuration from JSON file
      */
-    window.HelpAssistant.startItemsTour = function() {
+    window.HelpAssistant.loadTour = function(tourName, startStep) {
         // Check if Intro.js is available
         if (typeof introJs === 'undefined') {
             console.error('Intro.js library is not loaded. Please ensure intro.min.js is included.');
@@ -26,34 +24,59 @@
             return;
         }
 
-        // Define tour steps
-        const intro = introJs();
+        // Construct the JSON file path
+        const basePath = window.HelpAssistant.basePath || '/modules/HelpAssistant/asset/tours/';
+        const jsonPath = basePath + tourName + '.json';
 
-        intro.setOptions({
-            steps: [
-                {
-                    element: document.querySelector('a.button[href*="/admin/item/add"]'),
-                    intro: 'Click this button to start adding a new item to your collection.',
-                    position: 'bottom'
-                },
-                {
-                    element: document.querySelector('#content'),
-                    intro: 'After clicking "Add new item", you will be taken to a form where you can enter details about your item. Look for fields like Title, Description, and other metadata fields.',
-                    position: 'top'
-                },
-                {
-                    intro: 'Fill in the required fields with information about your item. The Title field is typically required, while other fields are optional but recommended for better organization.',
-                    position: 'top'
-                },
-                {
-                    intro: 'You can also attach media files (images, documents, videos) to your item using the Media tab.',
-                    position: 'top'
-                },
-                {
-                    intro: 'Once you have filled in all necessary information, look for the "Save" or "Add" button at the bottom of the form to save your new item.',
-                    position: 'top'
+        // Fetch the tour configuration
+        fetch(jsonPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Tour configuration not found: ' + jsonPath);
                 }
-            ],
+                return response.json();
+            })
+            .then(tourConfig => {
+                window.HelpAssistant.startTour(tourConfig, startStep);
+            })
+            .catch(error => {
+                console.error('Error loading tour:', error);
+                alert('Unable to load help tour. Please try again later.');
+            });
+    };
+
+    /**
+     * Start a tour with the given configuration
+     */
+    window.HelpAssistant.startTour = function(tourConfig, startStep) {
+        // Use the new introJs.tour() API
+        const intro = introJs.tour ? introJs.tour() : introJs();
+
+        // Determine starting step (1-based from URL)
+        const startStepNumber = (startStep && !isNaN(parseInt(startStep)))
+            ? parseInt(startStep)
+            : 1;
+
+        console.log('Starting tour at step:', startStepNumber);
+
+        // Get all steps from config
+        const allSteps = tourConfig.steps || [];
+
+        // Filter steps: only include steps from startStepNumber onwards
+        // This prevents showing steps from previous pages
+        const filteredSteps = allSteps.slice(startStepNumber - 1);
+
+        console.log('Total steps:', allSteps.length, 'Filtered steps:', filteredSteps.length);
+
+        // Log element selectors to help with debugging
+        filteredSteps.forEach((step, index) => {
+            const element = step.element ? document.querySelector(step.element) : null;
+            console.log('Step', startStepNumber + index, ':', step.element, 'Found:', !!element);
+        });
+
+        // Default options
+        const options = {
+            steps: filteredSteps,
             exitOnOverlayClick: false,
             showStepNumbers: true,
             showBullets: true,
@@ -63,6 +86,42 @@
             nextLabel: 'Next',
             prevLabel: 'Back',
             doneLabel: 'Done'
+        };
+
+        intro.setOptions(options);
+
+        // Track whether tour has actually been displayed
+        let tourDisplayed = false;
+
+        // Handle before step change for redirects
+        intro.onbeforechange(function() {
+            const currentStepIndex = intro.currentStep();
+
+            // Map back to original step number in full tour
+            const originalStepIndex = (startStepNumber - 1) + currentStepIndex;
+
+            console.log('onbeforechange - currentStep in filtered:', currentStepIndex, 'original step:', originalStepIndex, 'tourDisplayed:', tourDisplayed);
+
+            // Allow initial step to display
+            if (!tourDisplayed) {
+                tourDisplayed = true;
+                console.log('Displaying initial step');
+                return true;
+            }
+
+            // Check if current step (the one we're leaving) has a redirect
+            const currentStep = filteredSteps[currentStepIndex];
+
+            if (currentStep && currentStep.redirect) {
+                console.log('Redirect detected, navigating to:', currentStep.redirect);
+                setTimeout(() => {
+                    intro.exit(false);
+                    window.location.href = currentStep.redirect;
+                }, 100);
+                return false; // Prevent step change
+            }
+
+            return true; // Allow normal navigation
         });
 
         // Handle tour completion
@@ -80,6 +139,13 @@
     };
 
     /**
+     * Legacy function for backward compatibility
+     */
+    window.HelpAssistant.startItemsTour = function() {
+        window.HelpAssistant.loadTour('add-item');
+    };
+
+    /**
      * Placeholder for additional tours
      *
      * Add more tour functions here following the same pattern:
@@ -93,9 +159,21 @@
      * Auto-initialize tours on specific pages (optional)
      */
     document.addEventListener('DOMContentLoaded', function() {
-        // Example: Auto-start tour if URL parameter is present
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('help-tour')) {
+
+        // Check for tour parameter with autostart
+        if (urlParams.has('tour') && urlParams.get('autostart') === 'true') {
+            const tourName = urlParams.get('tour');
+            const startStep = urlParams.get('step');
+
+            // Small delay to ensure DOM is fully ready
+            setTimeout(() => {
+                window.HelpAssistant.loadTour(tourName, startStep);
+            }, 500);
+        }
+
+        // Legacy support: help-tour parameter
+        else if (urlParams.has('help-tour')) {
             const tourName = urlParams.get('help-tour');
 
             switch(tourName) {
