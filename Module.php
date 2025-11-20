@@ -35,7 +35,7 @@ class Module extends AbstractModule
     {
         // Attach listener to load assets in admin interface
         $sharedEventManager->attach(
-            'Omeka\Controller\Admin\Item',
+            '*',
             'view.layout',
             [$this, 'loadAdminAssets']
         );
