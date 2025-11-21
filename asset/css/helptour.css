@@ -1,0 +1,9 @@
+.logo{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+.introjs-tooltip {
+  min-width: 300px !important;
+  max-width: 450px !important;
+}

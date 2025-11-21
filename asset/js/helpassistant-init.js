@@ -1,192 +1,283 @@
-/**
- * HelpAssistant - Intro.js Tour Initialization
- *
- * This script initializes contextual help tours for the Omeka S admin interface
- * using Intro.js library.
- */
-
 (function() {
     'use strict';
 
-    /**
-     * Initialize HelpAssistant namespace
-     */
     window.HelpAssistant = window.HelpAssistant || {};
 
-    /**
-     * Load a tour configuration from JSON file
-     */
-    window.HelpAssistant.loadTour = function(tourName, startStep) {
-        // Check if Intro.js is available
-        if (typeof introJs === 'undefined') {
-            console.error('Intro.js library is not loaded. Please ensure intro.min.js is included.');
-            alert('Help tour library is not available. Please contact your administrator.');
+    const ACTIVE_ICON_COLOR = '#1a73e8';
+    const INACTIVE_ICON_COLOR = '#9e9e9e';
+    const TOURS_MAP_URL = '/modules/HelpAssistant/asset/tours/tours-map.json';
+    const GENERIC_TOUR_CONFIG = {
+        showBullets: false,
+        showStepNumbers: false,
+        exitOnOverlayClick: true,
+        steps: [{
+            // &#8505; renders the info icon while keeping the source ASCII
+            intro: '&#8505; No hay ayuda disponible para esta secci&oacute;n. Disculpe las molestias.'
+        }]
+    };
+
+    let tourInfoPromise = null;
+
+    function ensureMaterialIcons() {
+        if (document.querySelector('link[data-helpassistant-icons]')) {
             return;
         }
 
-        // Construct the JSON file path
-        const basePath = window.HelpAssistant.basePath || '/modules/HelpAssistant/asset/tours/';
-        const jsonPath = basePath + tourName + '.json';
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=help';
+        link.setAttribute('data-helpassistant-icons', 'true');
 
-        // Fetch the tour configuration
-        fetch(jsonPath)
+        document.head.appendChild(link);
+    }
+
+    function getTourInfo() {
+        if (tourInfoPromise) {
+            return tourInfoPromise;
+        }
+
+        if (!window.HelpAssistantContext) {
+            tourInfoPromise = Promise.resolve({ available: false, tourFile: null });
+            return tourInfoPromise;
+        }
+
+        const controller = window.HelpAssistantContext.controller;
+        const action = window.HelpAssistantContext.action;
+        const tourKey = controller + ':' + action;
+
+        tourInfoPromise = fetch(TOURS_MAP_URL)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Tour configuration not found: ' + jsonPath);
+                    throw new Error('Tours map not found');
                 }
                 return response.json();
             })
-            .then(tourConfig => {
-                window.HelpAssistant.startTour(tourConfig, startStep);
+            .then(toursMap => {
+                const tourFile = toursMap[tourKey];
+                return {
+                    available: !!tourFile,
+                    tourFile: tourFile
+                };
             })
             .catch(error => {
-                console.error('Error loading tour:', error);
-                alert('Unable to load help tour. Please try again later.');
+                console.error('Tour availability error:', error);
+                return { available: false, tourFile: null };
             });
-    };
 
-    /**
-     * Start a tour with the given configuration
-     */
-    window.HelpAssistant.startTour = function(tourConfig, startStep) {
-        // Use the new introJs.tour() API
+        return tourInfoPromise;
+    }
+
+    function setIconState(button, isActive) {
+        const icon = button.querySelector('.material-symbols-outlined');
+        const color = isActive ? ACTIVE_ICON_COLOR : INACTIVE_ICON_COLOR;
+
+        if (icon) {
+            icon.style.color = color;
+        }
+
+        button.dataset.tourAvailable = isActive ? 'true' : 'false';
+        button.title = isActive ? 'Start guided tour' : 'No tour available for this page';
+        button.style.opacity = isActive ? '1' : '0.7';
+    }
+
+    function injectTourButton() {
+        const logo = document.querySelector('header > .logo');
+
+
+        if (!logo || !window.HelpAssistantContext) {
+            return;
+        }
+
+        const controller = window.HelpAssistantContext.controller;
+        const action = window.HelpAssistantContext.action;
+
+        ensureMaterialIcons();
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = 'helpassistant-start-tour';
+        button.className = 'helpassistant-button helpassistant-icon-button';
+        button.setAttribute('data-controller', controller);
+        button.setAttribute('data-action', action);
+        button.setAttribute('aria-label', 'Start help tour');
+        button.style.cssText = 'margin-left: 10px; margin-bottom: 0px; background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; box-shadow:none';
+
+        const icon = document.createElement('span');
+        icon.className = 'material-symbols-outlined';
+        icon.textContent = 'help';
+        icon.style.fontSize = '28px';
+        icon.style.lineHeight = '1';
+        button.appendChild(icon);
+
+        setIconState(button, false);
+
+        
+
+        button.addEventListener('click', startTour);
+
+        getTourInfo().then(info => {
+            logo.appendChild(button);
+            setIconState(button, info.available);
+            if (info.tourFile) {
+                button.dataset.tourFile = info.tourFile;
+            }
+        });
+    }
+
+    function startTour() {
+        const button = document.getElementById('helpassistant-start-tour');
+
+        getTourInfo()
+            .then(info => {
+                if (button && info.tourFile) {
+                    button.dataset.tourFile = info.tourFile;
+                }
+
+                if (!info.available || !info.tourFile) {
+                    if (button) {
+                        setIconState(button, false);
+                    }
+                    return { tourConfig: GENERIC_TOUR_CONFIG, isGeneric: true };
+                }
+
+                if (button) {
+                    setIconState(button, true);
+                }
+
+                return fetch('/modules/HelpAssistant/asset/tours/' + info.tourFile)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Tour file not found');
+                        }
+                        return response.json();
+                    })
+                    .then(tourConfig => ({ tourConfig: tourConfig, isGeneric: false }));
+            })
+            .then(result => {
+                if (!result || !result.tourConfig) {
+                    return;
+                }
+
+                if (typeof introJs === 'undefined') {
+                    alert('Intro.js library is not loaded');
+                    return;
+                }
+
+                runTour(result.tourConfig, 0);
+            })
+            .catch(error => {
+                console.error('Tour error:', error);
+            });
+    }
+
+    function runTour(tourConfig, startStep) {
         const intro = introJs.tour ? introJs.tour() : introJs();
-
-        // Determine starting step (1-based from URL)
-        const startStepNumber = (startStep && !isNaN(parseInt(startStep)))
-            ? parseInt(startStep)
-            : 1;
-
-        console.log('Starting tour at step:', startStepNumber);
-
-        // Get all steps from config
         const allSteps = tourConfig.steps || [];
 
-        // Filter steps: only include steps from startStepNumber onwards
-        // This prevents showing steps from previous pages
-        const filteredSteps = allSteps.slice(startStepNumber - 1);
+        // If resuming mid-tour, slice the steps array to only include steps from startStep onwards
+        // This prevents the redirect logic from triggering for steps on previous pages
+        const steps = startStep > 0 ? allSteps.slice(startStep) : allSteps;
 
-        console.log('Total steps:', allSteps.length, 'Filtered steps:', filteredSteps.length);
+        console.log('Running tour from step', startStep, '- using', steps.length, 'steps');
 
-        // Log element selectors to help with debugging
-        filteredSteps.forEach((step, index) => {
-            const element = step.element ? document.querySelector(step.element) : null;
-            console.log('Step', startStepNumber + index, ':', step.element, 'Found:', !!element);
-        });
+        // Track the current step we're displaying (0-indexed within the sliced array)
+        let displayedStep = 0;
 
-        // Default options
-        const options = {
-            steps: filteredSteps,
-            exitOnOverlayClick: false,
-            showStepNumbers: true,
-            showBullets: true,
-            showProgress: true,
-            scrollToElement: true,
-            overlayOpacity: 0.7,
-            nextLabel: 'Next',
-            prevLabel: 'Back',
-            doneLabel: 'Done'
-        };
+        // Create a modified config with the sliced steps
+        const modifiedConfig = Object.assign({}, tourConfig, { steps: steps });
+        intro.setOptions(modifiedConfig);
 
-        intro.setOptions(options);
-
-        // Track whether tour has actually been displayed
-        let tourDisplayed = false;
-
-        // Handle before step change for redirects
+        // onbeforechange fires BEFORE changing to a new step
         intro.onbeforechange(function() {
-            const currentStepIndex = intro.currentStep();
+            const goingToStep = intro.currentStep();
+            const leavingStep = displayedStep;
+            const stepConfig = steps[leavingStep];
 
-            // Map back to original step number in full tour
-            const originalStepIndex = (startStepNumber - 1) + currentStepIndex;
+            console.log('Tour: leaving step', leavingStep, '-> going to step', goingToStep);
 
-            console.log('onbeforechange - currentStep in filtered:', currentStepIndex, 'original step:', originalStepIndex, 'tourDisplayed:', tourDisplayed);
+            // Check if the step we're LEAVING has a redirect
+            if (stepConfig && stepConfig.redirect && goingToStep > leavingStep) {
+                const redirect = stepConfig.redirect;
 
-            // Allow initial step to display
-            if (!tourDisplayed) {
-                tourDisplayed = true;
-                console.log('Displaying initial step');
-                return true;
-            }
+                // Check if it's an anchor-only redirect (same page navigation)
+                if (redirect.startsWith('#')) {
+                    console.log('Anchor redirect detected:', redirect);
 
-            // Check if current step (the one we're leaving) has a redirect
-            const currentStep = filteredSteps[currentStepIndex];
-
-            if (currentStep && currentStep.redirect) {
-                console.log('Redirect detected, navigating to:', currentStep.redirect);
-                setTimeout(() => {
-                    intro.exit(false);
-                    window.location.href = currentStep.redirect;
-                }, 100);
-                return false; // Prevent step change
-            }
-
-            return true; // Allow normal navigation
-        });
-
-        // Handle tour completion
-        intro.oncomplete(function() {
-            console.log('Tour completed successfully');
-        });
-
-        // Handle tour exit
-        intro.onexit(function() {
-            console.log('Tour exited');
-        });
-
-        // Start the tour
-        intro.start();
-    };
-
-    /**
-     * Legacy function for backward compatibility
-     */
-    window.HelpAssistant.startItemsTour = function() {
-        window.HelpAssistant.loadTour('add-item');
-    };
-
-    /**
-     * Placeholder for additional tours
-     *
-     * Add more tour functions here following the same pattern:
-     *
-     * window.HelpAssistant.startMediaTour = function() { ... };
-     * window.HelpAssistant.startCollectionsTour = function() { ... };
-     * window.HelpAssistant.startSitePagesTour = function() { ... };
-     */
-
-    /**
-     * Auto-initialize tours on specific pages (optional)
-     */
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // Check for tour parameter with autostart
-        if (urlParams.has('tour') && urlParams.get('autostart') === 'true') {
-            const tourName = urlParams.get('tour');
-            const startStep = urlParams.get('step');
-
-            // Small delay to ensure DOM is fully ready
-            setTimeout(() => {
-                window.HelpAssistant.loadTour(tourName, startStep);
-            }, 500);
-        }
-
-        // Legacy support: help-tour parameter
-        else if (urlParams.has('help-tour')) {
-            const tourName = urlParams.get('help-tour');
-
-            switch(tourName) {
-                case 'items':
-                    if (typeof window.HelpAssistant.startItemsTour === 'function') {
-                        window.HelpAssistant.startItemsTour();
+                    // Click the anchor/tab element to activate it
+                    const anchorTarget = document.querySelector('a[href="' + redirect + '"]');
+                    if (anchorTarget) {
+                        anchorTarget.click();
                     }
-                    break;
-                // Add more cases for other tours here
-                default:
-                    console.warn('Unknown tour:', tourName);
+
+                    // Scroll to the element
+                    const targetElement = document.querySelector(redirect);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    // Allow the tour to continue to the next step (don't block)
+                    return true;
+                }
+
+                // Full page redirect
+                const originalStepIndex = startStep + leavingStep;
+                console.log('Page redirect detected on original step', originalStepIndex, ':', redirect);
+
+                sessionStorage.setItem('helpassistant_tour', JSON.stringify({
+                    config: tourConfig,  // Save the ORIGINAL full config
+                    nextStep: originalStepIndex + 1
+                }));
+
+                setTimeout(function() {
+                    window.location.href = redirect;
+                }, 100);
+
+                return false;
             }
+
+            return true;
+        });
+
+        // Update displayedStep after successful step change
+        intro.onafterchange(function() {
+            displayedStep = intro.currentStep();
+            console.log('Tour: now displaying step', displayedStep);
+        });
+
+        intro.onexit(function() {
+            sessionStorage.removeItem('helpassistant_tour');
+        });
+
+        intro.oncomplete(function() {
+            sessionStorage.removeItem('helpassistant_tour');
+        });
+
+        // Start the tour (always from step 0 of the sliced array)
+        intro.start();
+    }
+
+    function checkContinueTour() {
+        const tourData = sessionStorage.getItem('helpassistant_tour');
+        
+        if (!tourData) {
+            return;
         }
+
+        try {
+            const data = JSON.parse(tourData);
+            
+            setTimeout(function() {
+                runTour(data.config, data.nextStep);
+            }, 500);
+        } catch (e) {
+            console.error('Error continuing tour:', e);
+            sessionStorage.removeItem('helpassistant_tour');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        injectTourButton();
+        checkContinueTour();
     });
 
 })();

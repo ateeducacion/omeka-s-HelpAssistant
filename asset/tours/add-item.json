@@ -1,42 +1,42 @@
 {
   "steps": [
     {
-      "element": "a.button[href*='/admin/item/add']",
-      "intro": "Click here to create a new item in your Omeka S collection.",
+      "element": "#resource-template-select_field",
+      "title": "<span class=\"tour-icon\">&#x1F4DA;</span> Set the template",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Pick the <em>Resource template</em> to load the fields your school already uses. It keeps names, creators, and rights consistent across the collection.</p><p class=\"tour-tip\"><strong>Tip:</strong> Choose the school standard template first to save time later.</p></div></div>",
       "position": "bottom"
     },
     {
-      "element": "a.button[href*='/admin/item/add']",
-      "intro": "When you click this button, you'll be taken to the item creation form where you can add metadata, files, and other information.",
+      "element": "#resource-class-select_field",
+      "title": "<span class=\"tour-icon\">&#x1F4C3;</span> Classify the item",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Choose the <em>Resource class</em> (Document, Image, Physical Object, etc.). This helps organize and filter items for students and staff.</p></div></div>",
+      "position": "bottom"
+    },
+    {
+      "element": "div[data-property-term=\"dcterms:title\"]",
+      "title": "<span class=\"tour-icon\">&#x1F4D6;</span> Add a clear title",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Use a short, specific title students will recognize (e.g., \"School Yearbook 2010\" or \"STEM Fair Poster\").</p><p class=\"tour-tip\"><strong>Tip:</strong> Avoid placeholders like \"Untitled\"—titles power search results.</p></div></div>",
+      "position": "bottom"
+    },
+    {
+      "element": "div[data-property-term=\"dcterms:description\"]",
+      "title": "<span class=\"tour-icon\">&#x1F4DD;</span> Tell the story",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Describe who made it, when, and why it matters to the school. Keep one idea per paragraph and keep it student-friendly.</p><p class=\"tour-tip\"><strong>Tip:</strong> Add a second description field if you want both a short blurb and a longer note.</p></div></div>",
+      "position": "right"
+    },
+    {
+      "element": "#item-media-label",
+      "title": "<span class=\"tour-icon\">&#x1F4F7;</span> Add media",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Upload photos, scans, or audio that belong to this item. Each file can later have its own caption and credits.</p><p class=\"tour-tip\"><strong>Tip:</strong> Drag multiple files here to add them in one go.</p></div></div>",
       "position": "bottom",
-      "redirect": "/admin/item/add?tour=add-item&step=3&autostart=true"
+      "redirect": "#item-media"
     },
     {
-      "element": "#resource_template_select_chosen",
-      "intro": "Choose a resource template to load a predefined set of metadata fields tailored to the type of item you are creating.",
+      "element": "button[data-media-type=\"upload\"]",
+      "title": "<span class=\"tour-icon\">&#x2B06;</span> Upload your file",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Browse for the file or drag it onto this button. Use clear filenames like \"Yearbook_2010.pdf\" to keep things organized.</p></div></div>",
       "position": "bottom"
-    },
-    {
-      "element": "#resource_class_select_chosen",
-      "intro": "Select the resource class to categorize this item (for example: Document, Image, or Physical Object).",
-      "position": "bottom"
-    },
-    {
-      "element": "div[data-property-term=\"dcterms:title\"] .input-value[data-value-key=\"@value\"]",
-      "intro": "Start by entering a title for your item. This is the main identifier that will appear in search results and item listings.",
-      "position": "right"
-    },
-    {
-      "element": "div[data-property-term=\"dcterms:description\"] .input-value[data-value-key=\"@value\"]",
-      "intro": "Add a description to provide more details about your item. You can use multiple description fields if needed.",
-      "position": "right"
-    },
-    
-    {
-      "element": "#item-media",
-      "intro": "Use the Media section to upload or link the files that belong to this item. Each media entry can have its own metadata.",
-      "position": "top",
-      "redirect": "http://localhost:8080/admin/item/add?tour=add-item&step=7&autostart=true#item-media"
     }
+
   ]
 }
