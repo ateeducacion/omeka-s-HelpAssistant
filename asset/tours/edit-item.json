@@ -1,0 +1,85 @@
+{
+    "showProgress": true,
+    "showStepNumbers": true,
+    "steps": [
+        {
+            "title": "📝 Editar ítem",
+            "intro": "<p>En esta pantalla puedes <strong>modificar los metadatos</strong> de un recurso educativo, actualizar sus archivos multimedia y gestionar su visibilidad.</p><p>Este tour te guiará por las secciones más importantes.</p>",
+            "position": "bottom"
+        },
+        {
+            "element": "h1 .title",
+            "title": "🏷️ Título del ítem",
+            "intro": "<p>Aquí aparece el <strong>título principal del ítem</strong>. Aunque no se edita desde este encabezado, te sirve para confirmar que estás en el recurso correcto.</p>",
+            "position": "bottom"
+        },
+        {
+            "element": "#page-actions",
+            "title": "💾 Guardar cambios",
+            "intro": "<p>Los botones de esta zona permiten:</p><ul><li><strong>Guardar el ítem</strong> con los cambios realizados.</li><li><strong>Cancelar:</strong><em> Descartar cambios y  volver al listado</em>.</li><li><strong>Borrar el ítem</strong></li><li><strong>👁️Visibilidad</strong> mostrar/ocular item al público</li></ul>",
+            "position": "left"
+        },
+        {
+            "element": "#resource-class-select_field",
+            "title": "📄 Plantilla de recurso",
+            "intro": "<p>Puedes cambiar la <strong>plantilla de metadatos</strong> utilizada en este ítem. Las plantillas ayudan a mantener ordenadas las colecciones educativas.</p>",
+            "position": "bottom"
+        },
+        {
+            "element": "div[data-property-term=\"dcterms:title\"]",
+            "title": "🖊️ Título",
+            "intro": "<p>Introduce aquí el <strong>título descriptivo</strong> del recurso. Por ejemplo:</p><ul><li>“Cartel de normas del aula”</li><li>“Experimento de densidad – 2º ESO”</li><li>“Mapa histórico de Andalucía (1910)”</li></ul>",
+            "position": "bottom"
+        },
+        {
+            "element": "div[data-property-term=\"dcterms:description\"]",
+            "title": "📚 Descripción",
+            "intro": "<p>Añade una <strong>descripción detallada</strong> del recurso.</p><p>Incluye información útil para docentes y estudiantes:</p><ul><li>Contexto del material</li><li>Fuente o autoría</li><li>Uso previsto en el aula</li></ul>",
+            "position": "bottom"
+        },
+        {
+            "element": "div[data-property-term=\"dcterms:creator\"]",
+            "title": "👤 Autoría",
+            "intro": "<p>Indica quién creó o recopiló este recurso. Puede ser:</p><ul><li>Un docente</li><li>Un grupo de alumnos</li><li>Una institución</li></ul>",
+            "position": "bottom"
+        },
+        {
+            "element": "#item-media-label",
+            "title": "🎞️ Medios asociados",
+            "intro": "<p>Aquí puedes <strong>añadir, eliminar o actualizar archivos multimedia</strong> del ítem:</p><ul><li>Imágenes</li><li>Vídeos</li><li>Documentos PDF</li><li>Archivos de audio</li></ul><p>Los medios enriquecen los recursos digitales del centro.</p>",
+            "position": "top",
+            "redirect": "#item-media"
+        },
+        {
+            "element": "#media-selector",
+            "title": "➕ Añadir nuevos medios",
+            "intro": "<p>Haz clic aquí para <strong>agregar nuevos archivos</strong>. Puedes subir material propio o enlazar fuentes externas.</p>",
+            "position": "right"
+        },
+        {
+            "element": "#media-list",
+            "title": "⚙️ Medios existentes",
+            "intro": "<p>En este panel puedes controlar los medios que tienes asociados al item:</p><ul><li>Marcar medio principal</li><li>Editar medio</li><li>Eliminar medios no deseados</li><li>Cambiar visibilidad del medio</li></ul>",
+            "position": "left"
+        },
+        {
+            "element": "#item-sets-label",
+            "title": "🧩 Item sets",
+            "intro": "<p>Indica a qué colecciones pertenece el item</p>",
+            "position": "left",
+            "redirect": "#item-sets"
+        },
+        {
+            "element": "#item-set-selector .total-count-heading",
+            "title": "🧩 Item sets",
+            "intro": "<p>Indica a qué colecciones pertenece el item</p>",
+            "position": "left"
+        },
+        {
+            "title": "🎉 Fin del recorrido",
+            "intro": "<p>Has completado el tour de la pantalla de <strong>edición de ítems</strong>.</p><p>Recuerda:</p><ul><li>Guardar los cambios antes de salir</li><li>Comprobar los metadatos principales</li><li>Añadir o actualizar los medios si es necesario</li></ul><p>Puedes iniciar otro recorrido desde el botón de ayuda del encabezado.</p>",
+            "position": "bottom"
+        }
+    ]
+}
+

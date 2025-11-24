@@ -1,6 +1,6 @@
 {
-    "name": "ateeducacion/omeka-s-moduletemplate",
-    "description": "Module template for Omeka S",
+    "name": "ateeducacion/omeka-s-helpassistant",
+    "description": "Provides contextual help tours for the Omeka S admin interface using Intro.js",
     "type": "omeka-s-module",
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -41,12 +41,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ModuleTemplate\\": "src/"
+            "HelpAssistant\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ModuleTemplateTest\\": "test/"
+            "HelpAssistantTest\\": "test/"
         }
     },
     "repositories": [

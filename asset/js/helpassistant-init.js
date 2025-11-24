@@ -5,7 +5,7 @@
 
     const ACTIVE_ICON_COLOR = '#1a73e8';
     const INACTIVE_ICON_COLOR = '#9e9e9e';
-    const TOURS_MAP_URL = '/modules/HelpAssistant/asset/tours/tours-map.json';
+    const TOURS_MAP_URL = '/admin/help-assistant/tours-map';
     const GENERIC_TOUR_CONFIG = {
         showBullets: false,
         showStepNumbers: false,
@@ -16,7 +16,7 @@
         }]
     };
 
-    let tourInfoPromise = null;
+    let toursConfigPromise = null;
 
     function ensureMaterialIcons() {
         if (document.querySelector('link[data-helpassistant-icons]')) {
@@ -31,40 +31,45 @@
         document.head.appendChild(link);
     }
 
-    function getTourInfo() {
-        if (tourInfoPromise) {
-            return tourInfoPromise;
+    function loadToursConfig() {
+        if (toursConfigPromise) {
+            return toursConfigPromise;
         }
 
-        if (!window.HelpAssistantContext) {
-            tourInfoPromise = Promise.resolve({ available: false, tourFile: null });
-            return tourInfoPromise;
-        }
-
-        const controller = window.HelpAssistantContext.controller;
-        const action = window.HelpAssistantContext.action;
-        const tourKey = controller + ':' + action;
-
-        tourInfoPromise = fetch(TOURS_MAP_URL)
+        toursConfigPromise = fetch(TOURS_MAP_URL)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Tours map not found');
                 }
                 return response.json();
             })
-            .then(toursMap => {
-                const tourFile = toursMap[tourKey];
-                return {
-                    available: !!tourFile,
-                    tourFile: tourFile
-                };
+            .then(data => {
+                return data && typeof data === 'object' && data.tours ? data.tours : {};
             })
             .catch(error => {
                 console.error('Tour availability error:', error);
-                return { available: false, tourFile: null };
+                return {};
             });
 
-        return tourInfoPromise;
+        return toursConfigPromise;
+    }
+
+    function getTourInfo() {
+        if (!window.HelpAssistantContext) {
+            return Promise.resolve({ available: false, tourConfig: null });
+        }
+
+        const controller = window.HelpAssistantContext.controller;
+        const action = window.HelpAssistantContext.action;
+        const tourKey = controller + ':' + action;
+
+        return loadToursConfig().then(toursMap => {
+            const tourConfig = toursMap[tourKey];
+            return {
+                available: !!tourConfig,
+                tourConfig: tourConfig || null
+            };
+        });
     }
 
     function setIconState(button, isActive) {
@@ -111,16 +116,12 @@
 
         setIconState(button, false);
 
-        
+        logo.appendChild(button);
 
         button.addEventListener('click', startTour);
 
         getTourInfo().then(info => {
-            logo.appendChild(button);
             setIconState(button, info.available);
-            if (info.tourFile) {
-                button.dataset.tourFile = info.tourFile;
-            }
         });
     }
 
@@ -129,11 +130,7 @@
 
         getTourInfo()
             .then(info => {
-                if (button && info.tourFile) {
-                    button.dataset.tourFile = info.tourFile;
-                }
-
-                if (!info.available || !info.tourFile) {
+                if (!info.available || !info.tourConfig) {
                     if (button) {
                         setIconState(button, false);
                     }
@@ -144,14 +141,7 @@
                     setIconState(button, true);
                 }
 
-                return fetch('/modules/HelpAssistant/asset/tours/' + info.tourFile)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Tour file not found');
-                        }
-                        return response.json();
-                    })
-                    .then(tourConfig => ({ tourConfig: tourConfig, isGeneric: false }));
+                return { tourConfig: info.tourConfig, isGeneric: false };
             })
             .then(result => {
                 if (!result || !result.tourConfig) {

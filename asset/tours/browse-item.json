@@ -1,0 +1,70 @@
+{
+    "showProgress": true,
+    "showStepNumbers": true,
+    "steps": [
+        {
+            "title": "Listado de \u00edtems",
+            "intro": "Esta pantalla muestra todos los \u00edtems de la colecci\u00f3n digital del centro. Desde aqu\u00ed puedes navegar, buscar, ordenar y gestionar en lote los recursos creados por el profesorado o el alumnado.",
+            "position": "bottom"
+        },
+        {
+            "element": "h1 .title",
+            "title": "T\u00edtulo de la vista",
+            "intro": "El t\u00edtulo de la p\u00e1gina indica que est\u00e1s en el listado general de \u00edtems del repositorio.",
+            "position": "bottom"
+        },
+        {
+            "element": ".browse-controls .pagination",
+            "title": "Navegaci\u00f3n entre p\u00e1ginas",
+            "intro": "Aqu\u00ed puedes avanzar o retroceder entre p\u00e1ginas de resultados. Esta funci\u00f3n es \u00fatil cuando existen muchos \u00edtems en la colecci\u00f3n.",
+            "position": "bottom"
+        },
+        {
+            "element": ".advanced-search",
+            "title": "B\u00fasqueda avanzada",
+            "intro": "La b\u00fasqueda avanzada permite filtrar por propiedades, plantillas, fechas, visibilidad y otros criterios. Muy \u00fatil para localizar recursos educativos concretos.",
+            "position": "right"
+        },
+        {
+            "element": ".sorting",
+            "title": "Ordenaci\u00f3n de \u00edtems",
+            "intro": "Puedes ordenar los \u00edtems por fecha de creaci\u00f3n, ID, propietario, clase de recurso o t\u00edtulo. Este control facilita la organizaci\u00f3n del cat\u00e1logo.",
+            "position": "bottom"
+        },
+        {
+            "element": "#page-actions a.button",
+            "title": "A\u00f1adir nuevo \u00edtem",
+            "intro": "Este bot\u00f3n te permite crear un nuevo \u00edtem. Un \u00edtem puede contener im\u00e1genes, documentos, v\u00eddeos, audios u otros materiales educativos. Al hacer clic se abrir\u00e1 el formulario de creaci\u00f3n.",
+            "position": "left"
+        },
+        {
+            "element": ".batch-inputs",
+            "title": "Acciones en lote",
+            "intro": "Puedes aplicar acciones en lote, como editar o eliminar varios \u00edtems a la vez. Esta herramienta agiliza la gesti\u00f3n de grandes colecciones escolares.",
+            "position": "bottom"
+        },
+        {
+            "element": "table.tablesaw",
+            "title": "Tabla de \u00edtems",
+            "intro": "Aqu\u00ed aparece la lista de \u00edtems. Cada fila representa un recurso individual. Incluye miniaturas, t\u00edtulo, propietario y fecha de creaci\u00f3n.",
+            "position": "top"
+        },
+        {
+            "element": "table.tablesaw tbody tr:first-child .resource-link",
+            "title": "Acceso al \u00edtem",
+            "intro": "Haz clic sobre el t\u00edtulo o la miniatura para ver la ficha completa del \u00edtem, su descripci\u00f3n y sus metadatos.",
+            "position": "right"
+        },
+        {
+            "element": "table.tablesaw tbody tr:first-child ul.actions",
+            "title": "Opciones del \u00edtem",
+            "intro": "Desde aqu\u00ed puedes editar el \u00edtem, consultar sus detalles o eliminarlo. Estas acciones solo afectan al \u00edtem seleccionado.",
+            "position": "left"
+        },
+        {
+            "title": "Fin del recorrido",
+            "intro": "Este es el final del tour por el listado de \u00edtems. Puedes continuar explorando las opciones del sistema o iniciar otro recorrido desde el bot\u00f3n de ayuda.",
+            "position": "bottom"
+        }
+    ]
+}

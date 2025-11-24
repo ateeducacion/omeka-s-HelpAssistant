@@ -6,13 +6,62 @@ namespace HelpAssistant;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\View\Renderer\PhpRenderer;
+use HelpAssistant\Form\ConfigForm;
 use Omeka\Module\AbstractModule;
+use Laminas\Mvc\Controller\AbstractController;
+use Omeka\Settings\Settings;
 
 class Module extends AbstractModule
 {
     public function getConfig(): array
     {
         return include __DIR__ . '/config/module.config.php';
+    }
+
+    public function getConfigForm(PhpRenderer $renderer): string
+    {
+        $services = $this->getServiceLocator();
+        /** @var \Laminas\Form\FormElementManager $formManager */
+        $formManager = $services->get('FormElementManager');
+        /** @var ConfigForm $form */
+        $form = $formManager->get(ConfigForm::class);
+        $form->init();
+        $settings = $services->get('Omeka\Settings');
+        $mappings = $settings->get('helpassistant_tour_mappings', []);
+        $rows = $this->prepareMappingsForForm($mappings);
+
+        $form->get('mappings')->setOption('count', max(1, count($rows)));
+        $form->setData(['mappings' => $rows]);
+        $form->prepare();
+
+        return $renderer->formCollection($form);
+    }
+
+    public function handleConfigForm(AbstractController $controller): void
+    {
+        $services = $controller->getEvent()->getApplication()->getServiceManager();
+        /** @var \Laminas\Form\FormElementManager $formManager */
+        $formManager = $services->get('FormElementManager');
+        /** @var ConfigForm $form */
+        $form = $formManager->get(ConfigForm::class);
+        $form->init();
+        $post = $controller->getRequest()->getPost()->toArray();
+
+        if (isset($post['mappings']) && is_array($post['mappings'])) {
+            $form->get('mappings')->setOption('count', max(1, count($post['mappings'])));
+        }
+
+        $form->setData($post);
+        if (!$form->isValid()) {
+            return;
+        }
+
+        $data = $form->getData();
+        $mappings = $this->sanitizeMappings($data['mappings'] ?? []);
+
+        /** @var Settings $settings */
+        $settings = $services->get('Omeka\Settings');
+        $settings->set('helpassistant_tour_mappings', $mappings);
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
@@ -68,5 +117,52 @@ class Module extends AbstractModule
             'controller' => $controllerName,
             'action' => $action
         ];
+    }
+
+    private function prepareMappingsForForm(array $mappings): array
+    {
+        $rows = [];
+
+        foreach ($mappings as $mapping) {
+            $rows[] = [
+                'controller' => $mapping['controller'] ?? '',
+                'action' => $mapping['action'] ?? '',
+                'tour_json' => $mapping['tour_json'] ?? '',
+            ];
+        }
+
+        // Always provide at least one empty row for adding new mappings
+        $rows[] = ['controller' => '', 'action' => '', 'tour_json' => ''];
+
+        return $rows;
+    }
+
+    private function sanitizeMappings(array $mappings): array
+    {
+        $clean = [];
+
+        foreach ($mappings as $mapping) {
+            $controller = trim((string) ($mapping['controller'] ?? ''));
+            $action = trim((string) ($mapping['action'] ?? ''));
+            $tourJson = trim((string) ($mapping['tour_json'] ?? ''));
+
+            if ($controller === '' || $action === '' || $tourJson === '') {
+                continue;
+            }
+
+            $decoded = json_decode($tourJson, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            $encoded = json_encode($decoded, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            $clean[] = [
+                'controller' => $controller,
+                'action' => $action,
+                'tour_json' => $encoded,
+            ];
+        }
+
+        return $clean;
     }
 }
