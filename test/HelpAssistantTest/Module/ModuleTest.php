@@ -74,10 +74,11 @@ class ModuleTest extends TestCase
         $headLink = $this->createMock(\Laminas\View\Helper\HeadLink::class);
         $headScript = $this->createMock(\Laminas\View\Helper\HeadScript::class);
         
-        $assetUrl = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['__invoke'])
-            ->getMock();
-        $assetUrl->method('__invoke')->willReturn('mock-url');
+        $assetUrl = new class {
+            public function __invoke() {
+                return 'mock-url';
+            }
+        };
         
         $helperPluginManager = $this->createMock(\Laminas\View\HelperPluginManager::class);
         $helperPluginManager->method('get')->willReturnMap([
