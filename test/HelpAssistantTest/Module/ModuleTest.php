@@ -75,7 +75,8 @@ class ModuleTest extends TestCase
         $headScript = $this->createMock(\Laminas\View\Helper\HeadScript::class);
         
         $assetUrl = new class {
-            public function __invoke() {
+            public function __invoke()
+            {
                 return 'mock-url';
             }
         };
