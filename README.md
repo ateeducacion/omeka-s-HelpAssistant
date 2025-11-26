@@ -5,7 +5,7 @@ Help Assistant adds Intro.js guided tours to the Omeka S admin interface. A hel
 ## How it works
 
 - The module injects Intro.js assets plus a small initializer (`asset/js/helpassistant-init.js`) into every admin controller. It records the current controller/action in `window.HelpAssistantContext`.
-- The initializer renders a help icon next to the Omeka logo. Clicking it fetches `/admin/help-assistant/tours-map`, merges static tours with any saved in settings, and launches Intro.js.
+- The initializer renders a help icon next to the Omeka logo. Clicking it fetches `/admin/help-assistant/tours-map` and launches Intro.js.
 - Tours are keyed by `Controller:action` (for example `Item:add`). If no tour exists, a generic message is shown. Redirect-aware steps allow a tour to continue across tabs/pages.
 
 ## Repository layout
