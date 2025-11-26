@@ -26,17 +26,7 @@ HelpAssistant/
 
 ## Add or edit tours
 
-### 1) Ship a static tour with the module
-1. Create a JSON file under `asset/tours/` describing the Intro.js config.
-2. Map the target controller/action in `asset/tours/tours-map.json` using the pattern `Controller:action`.
-   ```json
-   {
-     "Item:add": "add-item.json"
-   }
-   ```
-3. Reload the admin page and click the help icon to verify the tour.
-
-### 2) Add a tour from the admin settings
+### Add a tour from the admin settings
 1. In Omeka S, go to `Modules → Help Assistant → Configure`.
 2. Add a row, choose the controller and action, and paste the tour JSON.
 3. Save; the mapping is stored in Omeka settings and overrides any static tour with the same key.
