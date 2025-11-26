@@ -79,7 +79,9 @@ class ModuleTest extends TestCase
             ['params', $params],
             ['headLink', $headLink],
             ['headScript', $headScript],
-            ['assetUrl', $this->returnCallback(function() { return 'mock-url'; })],
+            ['assetUrl', $this->returnCallback(function () {
+                return 'mock-url';
+            })],
         ]);
         
         $view = $this->getMockBuilder(PhpRenderer::class)
@@ -87,7 +89,7 @@ class ModuleTest extends TestCase
             ->getMock();
         
         $view->method('getHelperPluginManager')->willReturn($helperPluginManager);
-        $view->method('__call')->willReturnCallback(function($method, $args) use ($helperPluginManager) {
+        $view->method('__call')->willReturnCallback(function ($method, $args) use ($helperPluginManager) {
             return $helperPluginManager->get($method);
         });
         
