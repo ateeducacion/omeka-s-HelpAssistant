@@ -265,6 +265,24 @@
         }
     }
 
+    window.HelpAssistant.__test = {
+        ensureMaterialIcons: ensureMaterialIcons,
+        loadToursConfig: loadToursConfig,
+        getTourInfo: getTourInfo,
+        setIconState: setIconState,
+        injectTourButton: injectTourButton,
+        startTour: startTour,
+        runTour: runTour,
+        checkContinueTour: checkContinueTour,
+        resetToursConfigCache: function() { toursConfigPromise = null; },
+        constants: {
+            GENERIC_TOUR_CONFIG: GENERIC_TOUR_CONFIG,
+            TOURS_MAP_URL: TOURS_MAP_URL,
+            ACTIVE_ICON_COLOR: ACTIVE_ICON_COLOR,
+            INACTIVE_ICON_COLOR: INACTIVE_ICON_COLOR
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
         injectTourButton();
         checkContinueTour();

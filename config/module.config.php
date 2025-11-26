@@ -30,6 +30,7 @@ return [
         ],
     ],
     'router' => [
+
         'routes' => [
             'admin' => [
                 'child_routes' => [

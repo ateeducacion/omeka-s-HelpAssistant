@@ -21,32 +21,29 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer): string
     {
         $services = $this->getServiceLocator();
-        /** @var \Laminas\Form\FormElementManager $formManager */
+/** @var \Laminas\Form\FormElementManager $formManager */
         $formManager = $services->get('FormElementManager');
-        /** @var ConfigForm $form */
+/** @var ConfigForm $form */
         $form = $formManager->get(ConfigForm::class);
         $form->init();
         $settings = $services->get('Omeka\Settings');
         $mappings = $settings->get('helpassistant_tour_mappings', []);
         $rows = $this->prepareMappingsForForm($mappings);
-
         $form->get('mappings')->setOption('count', max(1, count($rows)));
         $form->setData(['mappings' => $rows]);
         $form->prepare();
-
         return $renderer->formCollection($form);
     }
 
     public function handleConfigForm(AbstractController $controller): void
     {
         $services = $controller->getEvent()->getApplication()->getServiceManager();
-        /** @var \Laminas\Form\FormElementManager $formManager */
+/** @var \Laminas\Form\FormElementManager $formManager */
         $formManager = $services->get('FormElementManager');
-        /** @var ConfigForm $form */
+/** @var ConfigForm $form */
         $form = $formManager->get(ConfigForm::class);
         $form->init();
         $post = $controller->getRequest()->getPost()->toArray();
-
         if (isset($post['mappings']) && is_array($post['mappings'])) {
             $form->get('mappings')->setOption('count', max(1, count($post['mappings'])));
         }
@@ -58,19 +55,14 @@ class Module extends AbstractModule
 
         $data = $form->getData();
         $mappings = $this->sanitizeMappings($data['mappings'] ?? []);
-
-        /** @var Settings $settings */
+/** @var Settings $settings */
         $settings = $services->get('Omeka\Settings');
         $settings->set('helpassistant_tour_mappings', $mappings);
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
-        $sharedEventManager->attach(
-            '*',
-            'view.layout',
-            [$this, 'loadAdminAssets']
-        );
+        $sharedEventManager->attach('*', 'view.layout', [$this, 'loadAdminAssets']);
     }
 
     public function loadAdminAssets(Event $event): void
@@ -112,17 +104,15 @@ class Module extends AbstractModule
 
         $controllerParts = explode('\\', $controller);
         $controllerName = end($controllerParts);
-
-        return [
+         return [
             'controller' => $controllerName,
             'action' => $action
-        ];
+            ];
     }
 
     private function prepareMappingsForForm(array $mappings): array
     {
         $rows = [];
-
         foreach ($mappings as $mapping) {
             $rows[] = [
                 'controller' => $mapping['controller'] ?? '',
@@ -133,19 +123,16 @@ class Module extends AbstractModule
 
         // Always provide at least one empty row for adding new mappings
         $rows[] = ['controller' => '', 'action' => '', 'tour_json' => ''];
-
         return $rows;
     }
 
     private function sanitizeMappings(array $mappings): array
     {
         $clean = [];
-
         foreach ($mappings as $mapping) {
             $controller = trim((string) ($mapping['controller'] ?? ''));
             $action = trim((string) ($mapping['action'] ?? ''));
             $tourJson = trim((string) ($mapping['tour_json'] ?? ''));
-
             if ($controller === '' || $action === '' || $tourJson === '') {
                 continue;
             }
