@@ -82,6 +82,9 @@ package:
 	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"$(VERSION)"/' config/module.ini
 	@echo "Creating ZIP archive: HelpAssistant-$(VERSION).zip..."
 	composer archive --format=zip --file="HelpAssistant-$(VERSION)"
+	echo "Repacking into proper structure..."
+	mkdir -p tmpzip/HelpAssistant && unzip -q HelpAssistant-$(VERSION)-raw.zip -d tmpzip/HelpAssistant && \
+	cd tmpzip && zip -qr ../HelpAssistant-$(VERSION).zip HelpAssistant && cd .. && rm -rf tmpzip HelpAssistant-$(VERSION)-raw.zip
 	@echo "Restoring version to 0.0.0 in module.ini..."
 	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"0.0.0"/' config/module.ini
 
@@ -251,3 +254,4 @@ import-sample:
 enable-module:
 	@echo "Enabling HelpAssistant module inside Omeka S..."
 	docker compose exec omekas sh -lc 'omeka-s-cli module:install HelpAssistant || true'
+
