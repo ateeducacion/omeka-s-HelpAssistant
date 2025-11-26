@@ -21,14 +21,15 @@
         "model-viewer"
     ],
     "require": {
-        "php": ">=7.4"
+        "php": "^8.0"
     },
     "config": {
-        "platform": {
-            "php": "7.4"
-        },
         "allow-plugins": {
             "omeka/composer-addon-installer": true
+        },
+        "platform-check": false,
+        "platform": {
+            "ext-intl": "1.0.0"
         }
     },
     "minimum-stability": "dev",
@@ -37,7 +38,14 @@
         "squizlabs/php_codesniffer": "*",
         "phpunit/phpunit": "*",
         "zerocrates/extract-tagged-strings": "dev-master",
-        "laminas/laminas-form": "^3.4"
+        "laminas/laminas-form": "^3.4",
+        "laminas/laminas-eventmanager": "^3.5",
+        "laminas/laminas-view": "^2.20",
+        "laminas/laminas-mvc": "^3.2",
+        "omeka/omeka-s": "^4.0"
+    },
+    "replace": {
+        "omeka-s-themes/default": "*"
     },
     "autoload": {
         "psr-4": {
