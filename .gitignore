@@ -4,3 +4,4 @@
 .phpunit.result.cache
 themes/
 vendor/
+node_modules/

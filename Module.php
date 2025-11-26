@@ -1,128 +1,155 @@
 <?php
 declare(strict_types=1);
 
-namespace ModuleTemplate;
+namespace HelpAssistant;
 
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\ServiceManager\ServiceLocatorInterface;
-use Laminas\Mvc\Controller\AbstractController;
 use Laminas\View\Renderer\PhpRenderer;
+use HelpAssistant\Form\ConfigForm;
 use Omeka\Module\AbstractModule;
-use Omeka\Mvc\Controller\Plugin\Messenger;
-use Omeka\Stdlib\Message;
-use ModuleTemplate\Form\ConfigForm;
+use Laminas\Mvc\Controller\AbstractController;
+use Omeka\Settings\Settings;
 
-/**
- * Main class for the module.
- */
 class Module extends AbstractModule
 {
-    /**
-     * Retrieve the configuration array.
-     *
-     * @return array
-     */
-    public function getConfig()
+    public function getConfig(): array
     {
         return include __DIR__ . '/config/module.config.php';
     }
 
-    /**
-     * Execute logic when the module is installed.
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     */
-    public function install(ServiceLocatorInterface $serviceLocator)
+    public function getConfigForm(PhpRenderer $renderer): string
     {
-        $messenger = new Messenger();
-        $message = new Message("ModuleTemplate module installed.");
-        $messenger->addSuccess($message);
+        $services = $this->getServiceLocator();
+/** @var \Laminas\Form\FormElementManager $formManager */
+        $formManager = $services->get('FormElementManager');
+/** @var ConfigForm $form */
+        $form = $formManager->get(ConfigForm::class);
+        $form->init();
+        $settings = $services->get('Omeka\Settings');
+        $mappings = $settings->get('helpassistant_tour_mappings', []);
+        $rows = $this->prepareMappingsForForm($mappings);
+        $form->get('mappings')->setOption('count', max(1, count($rows)));
+        $form->setData(['mappings' => $rows]);
+        $form->prepare();
+        return $renderer->formCollection($form);
     }
-    /**
-     * Execute logic when the module is uninstalled.
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     */
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
+
+    public function handleConfigForm(AbstractController $controller): void
     {
-        $messenger = new Messenger();
-        $message = new Message("ModuleTemplate module uninstalled.");
-        $messenger->addWarning($message);
+        $services = $controller->getEvent()->getApplication()->getServiceManager();
+/** @var \Laminas\Form\FormElementManager $formManager */
+        $formManager = $services->get('FormElementManager');
+/** @var ConfigForm $form */
+        $form = $formManager->get(ConfigForm::class);
+        $form->init();
+        $post = $controller->getRequest()->getPost()->toArray();
+        if (isset($post['mappings']) && is_array($post['mappings'])) {
+            $form->get('mappings')->setOption('count', max(1, count($post['mappings'])));
+        }
+
+        $form->setData($post);
+        if (!$form->isValid()) {
+            return;
+        }
+
+        $data = $form->getData();
+        $mappings = $this->sanitizeMappings($data['mappings'] ?? []);
+/** @var Settings $settings */
+        $settings = $services->get('Omeka\Settings');
+        $settings->set('helpassistant_tour_mappings', $mappings);
     }
-    
-    /**
-     * Register the file validator service and renderers.
-     *
-     * @param SharedEventManagerInterface $sharedEventManager
-     */
+
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
-        // Replace the default file validator with our custom one
+        $sharedEventManager->attach('*', 'view.layout', [$this, 'loadAdminAssets']);
     }
-    
-    /**
-     * Get the configuration form for this module.
-     *
-     * @param PhpRenderer $renderer
-     * @return string
-     */
-    public function getConfigForm(PhpRenderer $renderer)
+
+    public function loadAdminAssets(Event $event): void
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $settings = $services->get('Omeka\Settings');
-        
-        $form = new ConfigForm();
-        $form->init();
+        $view = $event->getTarget();
 
-        // Seed form fields with saved settings or defaults
-        $form->setData([
-            'activate_ModuleTemplate_cb' => $settings->get('activate_ModuleTemplate', 1),
-            'moduletemplate_demo_toggle' => $settings->get('moduletemplate_demo_toggle', false) ? '1' : '0',
-            'moduletemplate_demo_text' => $settings->get('moduletemplate_demo_text', 'Default text'),
-            'moduletemplate_demo_textarea' => $settings->get('moduletemplate_demo_textarea', "Line 1\nLine 2"),
-            'moduletemplate_demo_number' => $settings->get('moduletemplate_demo_number', 500),
-            'moduletemplate_demo_select' => $settings->get('moduletemplate_demo_select', 'b'),
-            'moduletemplate_demo_color' => $settings->get('moduletemplate_demo_color', '#3366ff'),
-            'moduletemplate_demo_email' => $settings->get('moduletemplate_demo_email', 'demo@example.com'),
-            'moduletemplate_demo_url' => $settings->get('moduletemplate_demo_url', 'https://example.com'),
-        ]);
-        
-        return $renderer->formCollection($form, false);
-    }
-    
-    /**
-     * Handle the configuration form submission.
-     *
-     * @param AbstractController $controller
-     */
-    public function handleConfigForm(AbstractController $controller)
-    {
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        
-        $config = $controller->params()->fromPost();
-
-        $value = isset($config['activate_ModuleTemplate_cb']) ? $config['activate_ModuleTemplate_cb'] : 0;
-        $settings->set('activate_ModuleTemplate', $value);
-
-        // Persist demo settings (cast/basic normalization)
-        $settings->set(
-            'moduletemplate_demo_toggle',
-            isset($config['moduletemplate_demo_toggle'])
-                && $config['moduletemplate_demo_toggle'] === '1'
-        );
-        $settings->set('moduletemplate_demo_text', (string)($config['moduletemplate_demo_text'] ?? ''));
-        $settings->set('moduletemplate_demo_textarea', (string)($config['moduletemplate_demo_textarea'] ?? ''));
-        if (isset($config['moduletemplate_demo_number']) && is_numeric($config['moduletemplate_demo_number'])) {
-            $settings->set('moduletemplate_demo_number', (int)$config['moduletemplate_demo_number']);
+        if (!$view instanceof PhpRenderer) {
+            return;
         }
-        $settings->set('moduletemplate_demo_select', (string)($config['moduletemplate_demo_select'] ?? ''));
-        $settings->set('moduletemplate_demo_color', (string)($config['moduletemplate_demo_color'] ?? ''));
-        $settings->set('moduletemplate_demo_email', (string)($config['moduletemplate_demo_email'] ?? ''));
-        $settings->set('moduletemplate_demo_url', (string)($config['moduletemplate_demo_url'] ?? ''));
+
+        $routeMatch = $view->getHelperPluginManager()->get('params')->fromRoute();
+        $controller = $routeMatch['controller'] ?? '';
+
+        if (strpos($controller, 'Admin') === false) {
+            return;
+        }
+
+        $view->headLink()->appendStylesheet($view->assetUrl('css/introjs.min.css', 'HelpAssistant'));
+        $view->headScript()->appendFile($view->assetUrl('js/intro.min.js', 'HelpAssistant'));
+        $view->headLink()->appendStylesheet($view->assetUrl('css/helptour.css', 'HelpAssistant'));
+
+        
+        $controllerAction = $this->getControllerAction($routeMatch);
+        
+        $inlineScript = sprintf(
+            'window.HelpAssistantContext = { controller: %s, action: %s };',
+            json_encode($controllerAction['controller']),
+            json_encode($controllerAction['action'])
+        );
+        
+        $view->headScript()->appendScript($inlineScript);
+        $view->headScript()->appendFile($view->assetUrl('js/helpassistant-init.js', 'HelpAssistant'));
     }
-    
-    // /**
+
+    private function getControllerAction(array $routeMatch): array
+    {
+        $controller = $routeMatch['controller'] ?? '';
+        $action = $routeMatch['action'] ?? '';
+
+        $controllerParts = explode('\\', $controller);
+        $controllerName = end($controllerParts);
+         return [
+            'controller' => $controllerName,
+            'action' => $action
+            ];
+    }
+
+    private function prepareMappingsForForm(array $mappings): array
+    {
+        $rows = [];
+        foreach ($mappings as $mapping) {
+            $rows[] = [
+                'controller' => $mapping['controller'] ?? '',
+                'action' => $mapping['action'] ?? '',
+                'tour_json' => $mapping['tour_json'] ?? '',
+            ];
+        }
+
+        // Always provide at least one empty row for adding new mappings
+        $rows[] = ['controller' => '', 'action' => '', 'tour_json' => ''];
+        return $rows;
+    }
+
+    private function sanitizeMappings(array $mappings): array
+    {
+        $clean = [];
+        foreach ($mappings as $mapping) {
+            $controller = trim((string) ($mapping['controller'] ?? ''));
+            $action = trim((string) ($mapping['action'] ?? ''));
+            $tourJson = trim((string) ($mapping['tour_json'] ?? ''));
+            if ($controller === '' || $action === '' || $tourJson === '') {
+                continue;
+            }
+
+            $decoded = json_decode($tourJson, true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            $encoded = json_encode($decoded, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            $clean[] = [
+                'controller' => $controller,
+                'action' => $action,
+                'tour_json' => $encoded,
+            ];
+        }
+
+        return $clean;
+    }
 }

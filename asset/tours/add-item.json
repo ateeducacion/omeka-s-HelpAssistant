@@ -1,0 +1,42 @@
+{
+  "steps": [
+    {
+      "element": "#resource-template-select_field",
+      "title": "<span class=\"tour-icon\">&#x1F4DA;</span> Set the template",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Pick the <em>Resource template</em> to load the fields your school already uses. It keeps names, creators, and rights consistent across the collection.</p><p class=\"tour-tip\"><strong>Tip:</strong> Choose the school standard template first to save time later.</p></div></div>",
+      "position": "bottom"
+    },
+    {
+      "element": "#resource-class-select_field",
+      "title": "<span class=\"tour-icon\">&#x1F4C3;</span> Classify the item",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Choose the <em>Resource class</em> (Document, Image, Physical Object, etc.). This helps organize and filter items for students and staff.</p></div></div>",
+      "position": "bottom"
+    },
+    {
+      "element": "div[data-property-term=\"dcterms:title\"]",
+      "title": "<span class=\"tour-icon\">&#x1F4D6;</span> Add a clear title",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Use a short, specific title students will recognize (e.g., \"School Yearbook 2010\" or \"STEM Fair Poster\").</p><p class=\"tour-tip\"><strong>Tip:</strong> Avoid placeholders like \"Untitled\"—titles power search results.</p></div></div>",
+      "position": "bottom"
+    },
+    {
+      "element": "div[data-property-term=\"dcterms:description\"]",
+      "title": "<span class=\"tour-icon\">&#x1F4DD;</span> Tell the story",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Describe who made it, when, and why it matters to the school. Keep one idea per paragraph and keep it student-friendly.</p><p class=\"tour-tip\"><strong>Tip:</strong> Add a second description field if you want both a short blurb and a longer note.</p></div></div>",
+      "position": "right"
+    },
+    {
+      "element": "#item-media-label",
+      "title": "<span class=\"tour-icon\">&#x1F4F7;</span> Add media",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Upload photos, scans, or audio that belong to this item. Each file can later have its own caption and credits.</p><p class=\"tour-tip\"><strong>Tip:</strong> Drag multiple files here to add them in one go.</p></div></div>",
+      "position": "bottom",
+      "redirect": "#item-media"
+    },
+    {
+      "element": "button[data-media-type=\"upload\"]",
+      "title": "<span class=\"tour-icon\">&#x2B06;</span> Upload your file",
+      "intro": "<div class=\"tour-block\"><div class=\"tour-body\"><p>Browse for the file or drag it onto this button. Use clear filenames like \"Yearbook_2010.pdf\" to keep things organized.</p></div></div>",
+      "position": "bottom"
+    }
+
+  ]
+}
