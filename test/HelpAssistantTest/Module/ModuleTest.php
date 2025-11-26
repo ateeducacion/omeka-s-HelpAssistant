@@ -74,14 +74,17 @@ class ModuleTest extends TestCase
         $headLink = $this->createMock(\Laminas\View\Helper\HeadLink::class);
         $headScript = $this->createMock(\Laminas\View\Helper\HeadScript::class);
         
+        $assetUrl = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['__invoke'])
+            ->getMock();
+        $assetUrl->method('__invoke')->willReturn('mock-url');
+        
         $helperPluginManager = $this->createMock(\Laminas\View\HelperPluginManager::class);
         $helperPluginManager->method('get')->willReturnMap([
             ['params', $params],
             ['headLink', $headLink],
             ['headScript', $headScript],
-            ['assetUrl', $this->returnCallback(function () {
-                return 'mock-url';
-            })],
+            ['assetUrl', $assetUrl],
         ]);
         
         $view = $this->getMockBuilder(PhpRenderer::class)
