@@ -1,8 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace HelpAssistantTest\Module;
-
-require_once dirname(__DIR__, 3) . '/Module.php';
 
 use HelpAssistant\Module;
 use Laminas\EventManager\Event;
