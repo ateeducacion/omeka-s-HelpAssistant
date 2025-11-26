@@ -71,21 +71,25 @@ class ModuleTest extends TestCase
         $params = $this->createMock(\Laminas\Mvc\Controller\Plugin\Params::class);
         $params->method('fromRoute')->willReturn($routeMatch);
         
-        $helperPluginManager = $this->createMock(\Laminas\View\HelperPluginManager::class);
-        $helperPluginManager->method('get')->with('params')->willReturn($params);
-        
         $headLink = $this->createMock(\Laminas\View\Helper\HeadLink::class);
         $headScript = $this->createMock(\Laminas\View\Helper\HeadScript::class);
         
+        $helperPluginManager = $this->createMock(\Laminas\View\HelperPluginManager::class);
+        $helperPluginManager->method('get')->willReturnMap([
+            ['params', $params],
+            ['headLink', $headLink],
+            ['headScript', $headScript],
+            ['assetUrl', $this->returnCallback(function() { return 'mock-url'; })],
+        ]);
+        
         $view = $this->getMockBuilder(PhpRenderer::class)
-            ->onlyMethods(['getHelperPluginManager'])
-            ->addMethods(['headLink', 'headScript', 'assetUrl'])
+            ->onlyMethods(['getHelperPluginManager', '__call'])
             ->getMock();
         
         $view->method('getHelperPluginManager')->willReturn($helperPluginManager);
-        $view->method('headLink')->willReturn($headLink);
-        $view->method('headScript')->willReturn($headScript);
-        $view->method('assetUrl')->willReturn('mock-url');
+        $view->method('__call')->willReturnCallback(function($method, $args) use ($helperPluginManager) {
+            return $helperPluginManager->get($method);
+        });
         
         $event = new Event('view.layout', $view);
 
@@ -107,15 +111,13 @@ class ModuleTest extends TestCase
         $helperPluginManager->method('get')->with('params')->willReturn($params);
         
         $view = $this->getMockBuilder(PhpRenderer::class)
-            ->onlyMethods(['getHelperPluginManager'])
-            ->addMethods(['headLink', 'headScript', 'assetUrl'])
+            ->onlyMethods(['getHelperPluginManager', '__call'])
             ->getMock();
         
         $view->method('getHelperPluginManager')->willReturn($helperPluginManager);
         
         // headLink and headScript should NOT be called for non-admin routes
-        $view->expects($this->never())->method('headLink');
-        $view->expects($this->never())->method('headScript');
+        $view->expects($this->never())->method('__call');
         
         $event = new Event('view.layout', $view);
 
