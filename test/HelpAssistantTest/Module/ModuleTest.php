@@ -80,13 +80,21 @@ class ModuleTest extends TestCase
                 return 'mock-url';
             }
         };
-        
+
+        $urlHelper = new class {
+            public function __invoke()
+            {
+                return '/admin/help-assistant/tours-map';
+            }
+        };
+
         $helperPluginManager = $this->createMock(\Laminas\View\HelperPluginManager::class);
         $helperPluginManager->method('get')->willReturnMap([
             ['params', $params],
             ['headLink', $headLink],
             ['headScript', $headScript],
             ['assetUrl', $assetUrl],
+            ['url', $urlHelper],
         ]);
         
         $view = $this->getMockBuilder(PhpRenderer::class)
