@@ -86,13 +86,25 @@ class Module extends AbstractModule
 
         
         $controllerAction = $this->getControllerAction($routeMatch);
-        
+
+        // Generate the tours-map URL using the url() view helper
+        // This ensures the correct base path is used when behind a reverse proxy
+        $toursMapUrl = '';
+        try {
+            $urlHelper = $view->getHelperPluginManager()->get('url');
+            $toursMapUrl = $urlHelper('admin/help-assistant-tours-map');
+        } catch (\Exception $e) {
+            // Fallback to hardcoded path if url helper fails
+            $toursMapUrl = '/admin/help-assistant/tours-map';
+        }
+
         $inlineScript = sprintf(
-            'window.HelpAssistantContext = { controller: %s, action: %s };',
+            'window.HelpAssistantContext = { controller: %s, action: %s, toursMapUrl: %s };',
             json_encode($controllerAction['controller']),
-            json_encode($controllerAction['action'])
+            json_encode($controllerAction['action']),
+            json_encode($toursMapUrl)
         );
-        
+
         $view->headScript()->appendScript($inlineScript);
         $view->headScript()->appendFile($view->assetUrl('js/helpassistant-init.js', 'HelpAssistant'));
     }

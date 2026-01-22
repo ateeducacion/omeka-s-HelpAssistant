@@ -35,9 +35,28 @@ describe('HelpAssistant init script', () => {
     expect(links[0].rel).toBe('stylesheet');
   });
 
+  test('getToursMapUrl returns fallback when no context URL is set', () => {
+    const api = loadModule();
+    delete window.HelpAssistantContext;
+
+    expect(api.getToursMapUrl()).toBe('/admin/help-assistant/tours-map');
+  });
+
+  test('getToursMapUrl returns injected URL from context', () => {
+    const api = loadModule();
+    window.HelpAssistantContext = {
+      controller: 'items',
+      action: 'browse',
+      toursMapUrl: '/medusa/mediateca/admin/help-assistant/tours-map'
+    };
+
+    expect(api.getToursMapUrl()).toBe('/medusa/mediateca/admin/help-assistant/tours-map');
+  });
+
   test('loadToursConfig returns tours map and caches the request', async () => {
     const api = loadModule();
     api.resetToursConfigCache();
+    window.HelpAssistantContext = { controller: 'test', action: 'test', toursMapUrl: '/admin/help-assistant/tours-map' };
 
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
