@@ -5,7 +5,14 @@
 
     const ACTIVE_ICON_COLOR = '#1a73e8';
     const INACTIVE_ICON_COLOR = '#9e9e9e';
-    const TOURS_MAP_URL = '/admin/help-assistant/tours-map';
+    const TOURS_MAP_URL_FALLBACK = '/admin/help-assistant/tours-map';
+
+    function getToursMapUrl() {
+        if (window.HelpAssistantContext && window.HelpAssistantContext.toursMapUrl) {
+            return window.HelpAssistantContext.toursMapUrl;
+        }
+        return TOURS_MAP_URL_FALLBACK;
+    }
     const GENERIC_TOUR_CONFIG = {
         showBullets: false,
         showStepNumbers: false,
@@ -36,7 +43,7 @@
             return toursConfigPromise;
         }
 
-        toursConfigPromise = fetch(TOURS_MAP_URL)
+        toursConfigPromise = fetch(getToursMapUrl())
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Tours map not found');
