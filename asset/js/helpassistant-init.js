@@ -284,7 +284,7 @@
         resetToursConfigCache: function() { toursConfigPromise = null; },
         constants: {
             GENERIC_TOUR_CONFIG: GENERIC_TOUR_CONFIG,
-            TOURS_MAP_URL: TOURS_MAP_URL,
+            TOURS_MAP_URL: TOURS_MAP_URL_FALLBACK,
             ACTIVE_ICON_COLOR: ACTIVE_ICON_COLOR,
             INACTIVE_ICON_COLOR: INACTIVE_ICON_COLOR
         }

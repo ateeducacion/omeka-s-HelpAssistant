@@ -78,15 +78,16 @@ package:
 		echo "Error: VERSION not specified. Use 'make package VERSION=1.2.3'"; \
 		exit 1; \
 	fi
-	@echo "Updating version to $(VERSION) in module.ini..."
-	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"$(VERSION)"/' config/module.ini
+	$(eval CLEAN_VERSION := $(shell echo $(VERSION) | sed 's/^v//'))
+	@echo "Updating version to $(CLEAN_VERSION) in module.ini..."
+	$(SED_INPLACE) 's/^version[[:space:]]*=.*/version      = "$(CLEAN_VERSION)"/' config/module.ini
 	@echo "Creating ZIP archive: HelpAssistant-$(VERSION).zip..."
 	composer archive --format=zip --file="HelpAssistant-$(VERSION)-raw"
 	echo "Repacking into proper structure..."
 	mkdir -p tmpzip/HelpAssistant && unzip -q HelpAssistant-$(VERSION)-raw.zip -d tmpzip/HelpAssistant && \
 	cd tmpzip && zip -qr ../HelpAssistant-$(VERSION).zip HelpAssistant && cd .. && rm -rf tmpzip HelpAssistant-$(VERSION)-raw.zip
-	@echo "Restoring version to 0.0.0 in module.ini..."
-	$(SED_INPLACE) 's/^\([[:space:]]*version[[:space:]]*=[[:space:]]*\).*$$/\1"0.0.0"/' config/module.ini
+	@echo "Restoring version to 1.0.0 in module.ini..."
+	$(SED_INPLACE) 's/^version[[:space:]]*=.*/version      = "1.0.0"/' config/module.ini
 
 # Generate .pot template from translate() and // @translate
 generate-pot:
