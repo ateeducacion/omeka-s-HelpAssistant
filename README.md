@@ -1,5 +1,10 @@
 # Help Assistant for Omeka S
 
+<a href="https://ateeducacion.github.io/omeka-s-playground/?blueprint=https%3A%2F%2Fraw.githubusercontent.com%2Fateeducacion%2Fomeka-s-HelpAssistant%2Frefs%2Fheads%2Fmain%2Fblueprint.json">
+  <img src="https://raw.githubusercontent.com/ateeducacion/omeka-s-playground/main/ogimage.png" alt="Try Help Assistant in your browser" width="220">
+</a><br>
+<small><a href="https://ateeducacion.github.io/omeka-s-playground/?blueprint=https%3A%2F%2Fraw.githubusercontent.com%2Fateeducacion%2Fomeka-s-HelpAssistant%2Frefs%2Fheads%2Fmain%2Fblueprint.json">Try in your browser</a></small>
+
 Help Assistant adds Intro.js guided tours to the Omeka S admin interface. A help icon appears in the admin header and launches a page-specific tour defined by JSON. Tours can come from bundled files or custom mappings configured in the module settings, making it easier to onboard new users to key workflows (browse, add, and edit items, etc.).
 
 ## How it works
@@ -74,4 +79,3 @@ Core targets (run `make help` for the full list):
 ## License
 
 GPL-3.0-or-later. See `LICENSE`.
-
