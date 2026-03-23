@@ -39,7 +39,17 @@ describe('HelpAssistant init script', () => {
     const api = loadModule();
     delete window.HelpAssistantContext;
 
+    // jsdom defaults to pathname '/', so getAdminBase() returns '' and the
+    // result is equivalent to the root-deployment path.
     expect(api.getToursMapUrl()).toBe('/admin/help-assistant/tours-map');
+  });
+
+  test('getToursMapUrl derives prefix from current location when context URL is empty', () => {
+    const api = loadModule();
+    window.HelpAssistantContext = { controller: 'test', action: 'test', toursMapUrl: '' };
+    window.history.pushState({}, '', '/omeka/admin/items');
+
+    expect(api.getToursMapUrl()).toBe('/omeka/admin/help-assistant/tours-map');
   });
 
   test('getToursMapUrl returns injected URL from context', () => {
