@@ -5,13 +5,24 @@
 
     const ACTIVE_ICON_COLOR = '#1a73e8';
     const INACTIVE_ICON_COLOR = '#9e9e9e';
-    const TOURS_MAP_URL_FALLBACK = '/admin/help-assistant/tours-map';
+    const TOURS_MAP_PATH = '/admin/help-assistant/tours-map';
+
+    // Detect the path prefix for Omeka S (e.g. '' for root, '/omeka' for subdirectory).
+    function getAdminBase() {
+        try {
+            var pathname = window.location.pathname;
+            var idx = pathname.indexOf('/admin/');
+            if (idx !== -1) return pathname.substring(0, idx);
+            if (/\/admin$/.test(pathname)) return pathname.replace(/\/admin$/, '');
+        } catch (e) {}
+        return '';
+    }
 
     function getToursMapUrl() {
         if (window.HelpAssistantContext && window.HelpAssistantContext.toursMapUrl) {
             return window.HelpAssistantContext.toursMapUrl;
         }
-        return TOURS_MAP_URL_FALLBACK;
+        return getAdminBase() + TOURS_MAP_PATH;
     }
     const GENERIC_TOUR_CONFIG = {
         showBullets: false,
@@ -274,6 +285,8 @@
 
     window.HelpAssistant.__test = {
         ensureMaterialIcons: ensureMaterialIcons,
+        getAdminBase: getAdminBase,
+        getToursMapUrl: getToursMapUrl,
         loadToursConfig: loadToursConfig,
         getTourInfo: getTourInfo,
         setIconState: setIconState,
@@ -284,7 +297,7 @@
         resetToursConfigCache: function() { toursConfigPromise = null; },
         constants: {
             GENERIC_TOUR_CONFIG: GENERIC_TOUR_CONFIG,
-            TOURS_MAP_URL: TOURS_MAP_URL_FALLBACK,
+            TOURS_MAP_PATH: TOURS_MAP_PATH,
             ACTIVE_ICON_COLOR: ACTIVE_ICON_COLOR,
             INACTIVE_ICON_COLOR: INACTIVE_ICON_COLOR
         }

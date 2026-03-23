@@ -94,8 +94,9 @@ class Module extends AbstractModule
             $urlHelper = $view->getHelperPluginManager()->get('url');
             $toursMapUrl = $urlHelper('admin/help-assistant-tours-map');
         } catch (\Exception $e) {
-            // Fallback to hardcoded path if url helper fails
-            $toursMapUrl = '/admin/help-assistant/tours-map';
+            // Cannot safely construct the URL; leave empty so JS derives it
+            // from the current page location (handles subdirectory deployments).
+            $toursMapUrl = '';
         }
 
         $inlineScript = sprintf(
