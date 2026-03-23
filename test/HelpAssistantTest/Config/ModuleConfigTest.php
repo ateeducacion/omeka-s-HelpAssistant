@@ -10,6 +10,13 @@ use PHPUnit\Framework\TestCase;
 
 class ModuleConfigTest extends TestCase
 {
+    public function testModuleIniNameMatchesModuleNamespace(): void
+    {
+        $moduleInfo = parse_ini_file(dirname(__DIR__, 3) . '/config/module.ini');
+
+        $this->assertSame('HelpAssistant', $moduleInfo['name']);
+    }
+
     public function testModuleConfigRegistersControllersFormsAndRoutes(): void
     {
         $config = require dirname(__DIR__, 3) . '/config/module.config.php';
