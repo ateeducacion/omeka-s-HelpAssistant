@@ -19,7 +19,7 @@
   ],
   "modules": [
     {
-      "name": "Help Assistant",
+      "name": "HelpAssistant",
       "state": "activate",
       "source": {
         "type": "url",
