@@ -1,5 +1,7 @@
 # Help Assistant for Omeka S
 
+[![codecov](https://codecov.io/gh/ateeducacion/omeka-s-HelpAssistant/branch/main/graph/badge.svg)](https://codecov.io/gh/ateeducacion/omeka-s-HelpAssistant)
+
 <a href="https://ateeducacion.github.io/omeka-s-playground/?blueprint=https%3A%2F%2Fraw.githubusercontent.com%2Fateeducacion%2Fomeka-s-HelpAssistant%2Frefs%2Fheads%2Fmain%2Fblueprint.json">
   <img src="https://raw.githubusercontent.com/ateeducacion/omeka-s-HelpAssistant/refs/heads/main/.github/assets/playground-preview-button.svg" alt="Try Help Assistant in your browser" width="224">
 </a><br>
@@ -79,3 +81,10 @@ Core targets (run `make help` for the full list):
 ## License
 
 GPL-3.0-or-later. See `LICENSE`.
+
+## Coverage
+
+Run `make test-coverage` with PCOV or Xdebug enabled. The target measures `Module.php`
+and every PHP file under `src/`, writes `coverage.xml`, and enforces at least 90%
+line coverage. CI uploads coverage to Codecov using OIDC; project and patch targets
+are both 90%.

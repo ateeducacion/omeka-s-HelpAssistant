@@ -5,3 +5,7 @@
 themes/
 vendor/
 node_modules/
+
+/coverage.xml
+/.phpunit.cache/
+/.phpunit.result.cache

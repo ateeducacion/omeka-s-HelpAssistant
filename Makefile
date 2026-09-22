@@ -32,7 +32,7 @@ ifeq ($(SYSTEM_OS),windows)
 	@echo "Detected system: Windows (cmd, powershell)"
 	@docker version > NUL 2>&1 || (echo. & echo Error: Docker is not running. Please make sure Docker is installed and running. & echo. & exit 1)
 else
-	@echo "Detected system: Unix (Linux/macOS/Cygwin/MinGW)"	
+	@echo "Detected system: Unix (Linux/macOS/Cygwin/MinGW)"
 	@docker version > /dev/null 2>&1 || (echo "" && echo "Error: Docker is not running. Please make sure Docker is installed and running." && echo "" && exit 1)
 endif
 
@@ -257,3 +257,8 @@ enable-module:
 	docker compose exec omekas sh -lc 'omeka-s-cli module:install HelpAssistant || true'
 
 
+
+.PHONY: test-coverage
+test-coverage:
+	php -d pcov.directory=. vendor/bin/phpunit -c test/phpunit.xml --coverage-clover coverage.xml
+	php test/check-coverage.php coverage.xml 90
