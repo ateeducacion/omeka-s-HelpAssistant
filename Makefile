@@ -260,5 +260,6 @@ enable-module:
 
 .PHONY: test-coverage
 test-coverage:
+	@rm -f coverage.xml
 	php -d pcov.directory=. vendor/bin/phpunit -c test/phpunit.xml --coverage-clover coverage.xml
 	php test/check-coverage.php coverage.xml 90
