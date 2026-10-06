@@ -61,7 +61,7 @@ Common fields: `steps` (array), `element` (CSS selector, optional for intro-only
 
 ## Development and Makefile
 
-The repo ships with a Docker Compose stack (`erseco/alpine-omeka-s:develop` + MariaDB) and a Makefile to drive it. Port 8080 is exposed by default.
+The repo ships with a Docker Compose stack (`erseco/alpine-omeka-s:4.2` + MariaDB, configured from `blueprint.json`) and a Makefile to drive it. Port 8080 is exposed by default.
 
 Core targets (run `make help` for the full list):
 - `make up` / `make upd` — start the stack in foreground/background; browse http://localhost:8080
